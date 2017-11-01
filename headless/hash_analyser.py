@@ -1,9 +1,10 @@
-import numpy as np
-import cv2
 import time
 import requests
 import wordsmaker
 import sys
+import createimg
+from Queue import Queue
+import threading
 
 class chartDivider:
     def __init__(self):
@@ -31,32 +32,6 @@ class chartDivider:
                 self.numbers.append(c)
             else:
                 self.letters += c
-
-    def polyline(self):
-        lnum = self.numbers
-        elist = []
-        plist = []
-        cnt = 0
-        c = 0
-        for n in lnum:
-            if int(n) != 0:
-                if cnt != 2:
-                    pn = ((int(n) * int(lnum[c + 1])) * int(lnum[c + 2])) + (int(lnum[c + 3]) * 100)
-                    if pn > 10:
-                        plist.append(pn)
-                        cnt += 1
-                        c += 1
-                else:
-                    elist.append(tuple(plist))
-                    plist = []
-                    cnt = 0
-        image = cv2.imread('imgbq.jpg', -1)
-        mask = np.zeros(image.shape, dtype=np.uint8)
-        roi_corners = np.array([elist], dtype=np.int32)
-        channel_count = image.shape[2]  # i.e. 3 or 4 depending on your image
-        ignore_mask_color = (255,) * channel_count
-        cv2.fillPoly(mask, roi_corners, ignore_mask_color)
-        self.masked_image = cv2.bitwise_and(image, mask)
 
 
     def createword(self):
@@ -133,5 +108,24 @@ class chartDivider:
         else:
             return None
 
+
+def creat(i):
+    p = createimg.polyline(numbers, i)
+
+def workerddl():
+    item = q.get()
+    creat(item)
+    q.task_done()
+
+
 chart = chartDivider()
-chart.run()
+imgs = chart.run()
+numbers = chart.numbers
+q = Queue()
+for i in range(len(imgs)):
+    t = threading.Thread(target=workerddl)
+    t.daemon = True  # thread dies when main thread (only non-daemon thread) exits.
+    t.start()
+for i in imgs:
+    q.put(i)
+q.join()
