@@ -37,7 +37,6 @@ def lineParser(line):
         o = o + 1
 
     if len(fword) == len(line):
-        print(fword)
         return fword
         #n = n + 1
 
@@ -45,7 +44,6 @@ def lineParser(line):
 def run(ustr):
     global ulet
     ulet = sort_letters(ustr)
-    print ulet
     #n = 0
     file = open(dico, 'r')
     p = Pool(20)
